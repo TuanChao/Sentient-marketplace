@@ -1,0 +1,78 @@
+.collections-page {
+  width: 100%;
+  padding: 32px;
+  min-height: calc(100vh - 80px);
+}
+
+.collections-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.collections-header h1 {
+  font-size: 48px;
+  font-weight: 800;
+  color: #04111d;
+  margin-bottom: 8px;
+}
+
+.collections-header p {
+  font-size: 20px;
+  color: #8a939b;
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.collection-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e8eb;
+  transition: all 0.3s ease;
+}
+
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.collection-banner img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.collection-info {
+  padding: 20px;
+}
+
+.collection-info h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.collection-info p {
+  color: #8a939b;
+  font-size: 14px;
+}
+
+.coming-soon {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  color: #8a939b;
+}
+
+.coming-soon h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: #04111d;
+}

@@ -1,0 +1,150 @@
+/* Dark Theme for All Pages */
+
+/* Collections Page */
+.collections-page {
+  background: var(--bg-primary) !important;
+}
+
+.collections-header h1,
+.stats-header h1,
+.create-header h1,
+.profile-info h1 {
+  color: var(--text-primary) !important;
+}
+
+.collections-header p,
+.stats-header p,
+.create-header p,
+.profile-info p {
+  color: var(--text-secondary) !important;
+}
+
+.collection-card,
+.stat-card,
+.create-form,
+.profile-info {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.collection-card:hover,
+.stat-card:hover {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.collection-info h3,
+.stat-value,
+.coming-soon h2,
+.coming-soon h3 {
+  color: var(--text-primary) !important;
+}
+
+.collection-info p,
+.stat-card h3,
+.coming-soon p {
+  color: var(--text-secondary) !important;
+}
+
+/* Stats Page */
+.stats-page {
+  background: var(--bg-primary) !important;
+}
+
+.stat-change.positive {
+  color: #10b981 !important;
+}
+
+.stat-change.negative {
+  color: #ef4444 !important;
+}
+
+/* Create Page */
+.create-page {
+  background: var(--bg-primary) !important;
+}
+
+.upload-area {
+  border: 2px dashed var(--border-primary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+.upload-area:hover {
+  border-color: var(--accent-primary) !important;
+  background: var(--bg-hover) !important;
+}
+
+.upload-placeholder {
+  color: var(--text-secondary) !important;
+}
+
+.upload-placeholder span {
+  color: var(--accent-primary) !important;
+}
+
+.field-group label {
+  color: var(--text-primary) !important;
+}
+
+.field-group input,
+.field-group textarea,
+.field-group select {
+  background: var(--bg-secondary) !important;
+  border: 2px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.field-group input:focus,
+.field-group textarea:focus,
+.field-group select:focus {
+  border-color: var(--accent-primary) !important;
+}
+
+.field-group input::placeholder,
+.field-group textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.price-input span {
+  color: var(--text-secondary) !important;
+}
+
+/* Profile Page */
+.profile-page {
+  background: var(--bg-primary) !important;
+}
+
+.profile-banner {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%) !important;
+}
+
+.profile-info {
+  background: var(--bg-card) !important;
+}
+
+.profile-tabs {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tab-button {
+  color: var(--text-secondary) !important;
+}
+
+.tab-button:hover {
+  color: var(--accent-primary) !important;
+  background: rgba(79, 70, 229, 0.05) !important;
+}
+
+.tab-button.active {
+  background: var(--accent-primary) !important;
+}
+
+.coming-soon {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  color: var(--text-secondary) !important;
+}

@@ -1,0 +1,232 @@
+/* AI Conversation Bubbles - Unique Design */
+.message {
+  margin-bottom: 24px;
+  display: flex;
+  animation: messageAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  z-index: 1;
+}
+
+.user-message {
+  justify-content: flex-end;
+}
+
+.bot-message {
+  justify-content: flex-start;
+}
+
+/* User Message - Clean Style for Better Readability */
+.user-message .message-content {
+  max-width: 75%;
+  padding: 16px 20px;
+  background:
+    linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(255, 20, 147, 0.9));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px 20px 5px 20px;
+  color: white;
+  position: relative;
+  box-shadow:
+    0 8px 32px rgba(138, 43, 226, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform-origin: bottom right;
+}
+
+/* AI Message - Solid Background for Better Readability */
+.bot-message .message-content {
+  max-width: 75%;
+  padding: 16px 20px;
+  background:
+    linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(20, 20, 35, 0.95));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 20px 20px 20px 5px;
+  color: rgba(255, 255, 255, 0.95);
+  position: relative;
+  box-shadow:
+    0 8px 32px rgba(138, 43, 226, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform-origin: bottom left;
+}
+
+/* Subtle Glowing Effect for AI Messages */
+.bot-message .message-content::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, rgba(138, 43, 226, 0.6), rgba(78, 205, 196, 0.6), rgba(138, 43, 226, 0.6));
+  background-size: 400% 400%;
+  border-radius: 22px;
+  z-index: -1;
+  animation: borderGlow 3s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+@keyframes borderGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Floating Particles for User Messages */
+.user-message .message-content::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 50%;
+  animation: particle 4s ease-in-out infinite;
+}
+
+@keyframes particle {
+  0%, 100% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-10px, -10px) scale(1);
+    opacity: 1;
+  }
+}
+
+.message-text {
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Enhanced Formatted Content Styles for Better Readability */
+.message-text strong {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.bullet-point {
+  margin: 8px 0;
+  padding-left: 8px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.section-header {
+  font-weight: 700;
+  margin: 16px 0 8px 0;
+  color: rgba(255, 255, 255, 1);
+  font-size: 1.05em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.numbered-item {
+  margin: 6px 0;
+  padding-left: 8px;
+  line-height: 1.5;
+}
+
+/* Enhanced Text Readability */
+.bot-message .message-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.6;
+}
+
+.bot-message .message-text br {
+  display: block;
+  margin: 8px 0;
+  line-height: 0;
+}
+
+/* User message with enhanced readability */
+.user-message .message-text {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  word-wrap: break-word;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+/* Improve readability with better spacing */
+.bot-message .message-text > div {
+  margin-bottom: 4px;
+}
+
+.bot-message .section-header {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  border-left: 3px solid rgba(138, 43, 226, 0.8);
+  padding-left: 12px;
+  background: rgba(138, 43, 226, 0.1);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.bot-message .bullet-point {
+  margin: 8px 0;
+  padding-left: 16px;
+  position: relative;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.bot-message .bullet-point::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  width: 4px;
+  height: 4px;
+  background: rgba(138, 43, 226, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(138, 43, 226, 0.5);
+}
+
+/* Better spacing between paragraphs */
+.bot-message .message-text p {
+  margin: 12px 0;
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 8px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.user-message .message-time {
+  text-align: right;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.bot-message .message-time {
+  text-align: left;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Hover Effects */
+.message-content:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
