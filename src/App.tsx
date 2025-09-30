@@ -2,7 +2,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { config } from './config/rainbowkit';
+import { config as wagmiConfig } from './config/wagmi';
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './layout/Layout';
 import AppRoutes from './routes';
@@ -14,7 +14,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
