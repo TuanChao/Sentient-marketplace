@@ -3,9 +3,11 @@ import { getTopCollections, getTrendingCollections, getMarketSummary } from '../
 import { romaFunctions } from '../ai/functionDefinitions';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for demo purposes
+// DeepSeek client using OpenAI SDK (DeepSeek API is OpenAI-compatible)
+const deepseek = new OpenAI({
+  baseURL: 'https://api.deepseek.com',
+  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+  dangerouslyAllowBrowser: true
 });
 
 export interface FunctionCall {
@@ -22,12 +24,12 @@ export const sendMessageWithFunctions = async (
   message: string,
   conversationHistory: ChatCompletionMessageParam[] = []
 ): Promise<AIResponse> => {
-  console.log('🔧 Debug: Starting sendMessageWithFunctions with:', message);
-  console.log('🔧 Debug: API Key exists:', !!import.meta.env.VITE_OPENAI_API_KEY);
+  console.log('🔧 Debug: Starting DeepSeek sendMessageWithFunctions with:', message);
+  console.log('🔧 Debug: API Key exists:', !!import.meta.env.VITE_DEEPSEEK_API_KEY);
 
   try {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured');
+    if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
+      throw new Error('DeepSeek API key is not configured');
     }
 
     // Get current NFT market data for context
@@ -93,30 +95,36 @@ ${nftContext}`
       }
     ];
 
-    console.log('🔧 Debug: Making OpenAI request with function calling...');
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4', // Using GPT-4 for better function calling
+    console.log('🔧 Debug: Making DeepSeek request with function calling...');
+    const response = await deepseek.chat.completions.create({
+      model: 'deepseek-chat', // DeepSeek's main model
       messages: messages,
-      functions: romaFunctions as any,
-      function_call: 'auto', // Let AI decide when to call functions
+      tools: romaFunctions.map(fn => ({
+        type: 'function' as const,
+        function: fn
+      })),
+      tool_choice: 'auto',
       max_tokens: 500,
       temperature: 0.7,
     });
 
-    console.log('🔧 Debug: OpenAI response received:', response);
+    console.log('🔧 Debug: DeepSeek response received:', response);
     const choice = response.choices[0];
     const aiMessage = choice?.message;
 
-    // Check if AI wants to call a function
-    if (aiMessage?.function_call) {
-      console.log('🎯 Function call detected:', aiMessage.function_call);
-      return {
-        content: '', // No text response when calling function
-        functionCall: {
-          name: aiMessage.function_call.name,
-          arguments: aiMessage.function_call.arguments
-        }
-      };
+    // Check if AI wants to call a function (DeepSeek uses tool_calls)
+    if (aiMessage?.tool_calls && aiMessage.tool_calls.length > 0) {
+      const toolCall = aiMessage.tool_calls[0];
+      if (toolCall.type === 'function') {
+        console.log('🎯 Function call detected:', toolCall.function);
+        return {
+          content: '',
+          functionCall: {
+            name: toolCall.function.name,
+            arguments: toolCall.function.arguments
+          }
+        };
+      }
     }
 
     // Regular text response
@@ -128,7 +136,7 @@ ${nftContext}`
     };
 
   } catch (error: any) {
-    console.error('❌ OpenAI Error Details:', {
+    console.error('❌ DeepSeek Error Details:', {
       message: error.message,
       status: error.status,
       code: error.code,
@@ -138,10 +146,10 @@ ${nftContext}`
 
     // More specific error messages
     if (error.status === 401) {
-      return { content: '🔑 Authentication failed. Please check your API key.' };
+      return { content: '🔑 Authentication failed. Please check your DeepSeek API key.' };
     }
     if (error.status === 429 || error.code === 'insufficient_quota') {
-      return { content: '💳 OpenAI API quota exceeded. Please check your billing plan at https://platform.openai.com/account/billing' };
+      return { content: '💳 DeepSeek API quota exceeded. Please check your account at https://platform.deepseek.com' };
     }
     if (error.status === 403) {
       return { content: '🚫 Access forbidden. Please check your API permissions.' };

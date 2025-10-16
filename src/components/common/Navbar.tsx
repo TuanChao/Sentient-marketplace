@@ -54,34 +54,6 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Navigation Links */}
-        <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
-          <Link
-            to="/marketplace"
-            className={`nav-link ${isActiveLink('/') || isActiveLink('/marketplace') ? 'active' : ''}`}
-          >
-            Explore
-          </Link>
-          <Link
-            to="/collections"
-            className={`nav-link ${isActiveLink('/collections') ? 'active' : ''}`}
-          >
-            Collections
-          </Link>
-          <Link
-            to="/stats"
-            className={`nav-link ${isActiveLink('/stats') ? 'active' : ''}`}
-          >
-            Stats
-          </Link>
-          <Link
-            to="/create"
-            className={`nav-link ${isActiveLink('/create') ? 'active' : ''}`}
-          >
-            Create
-          </Link>
-        </div>
-
         {/* User Actions */}
         <div className="navbar-actions">
           <button className="action-btn cart-btn" title="Shopping Cart">

@@ -3,9 +3,15 @@ import { getTopCollections, getTrendingCollections, getMarketSummary } from '../
 import { romaFunctions } from '../ai/functionDefinitions';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for demo purposes
+// OpenRouter client using OpenAI SDK
+const openrouter = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: import.meta.env.VITE_OPENROUTER_API_KEY,
+  dangerouslyAllowBrowser: true,
+  defaultHeaders: {
+    'HTTP-Referer': window.location.origin,
+    'X-Title': 'ROMA NFT Marketplace',
+  }
 });
 
 export interface FunctionCall {
@@ -22,12 +28,12 @@ export const sendMessageWithFunctions = async (
   message: string,
   conversationHistory: ChatCompletionMessageParam[] = []
 ): Promise<AIResponse> => {
-  console.log('🔧 Debug: Starting sendMessageWithFunctions with:', message);
-  console.log('🔧 Debug: API Key exists:', !!import.meta.env.VITE_OPENAI_API_KEY);
+  console.log('🔧 Debug: Starting OpenRouter sendMessageWithFunctions with:', message);
+  console.log('🔧 Debug: API Key exists:', !!import.meta.env.VITE_OPENROUTER_API_KEY);
 
   try {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured');
+    if (!import.meta.env.VITE_OPENROUTER_API_KEY) {
+      throw new Error('OpenRouter API key is not configured');
     }
 
     // Get current NFT market data for context
@@ -93,17 +99,17 @@ ${nftContext}`
       }
     ];
 
-    console.log('🔧 Debug: Making OpenAI request with function calling...');
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4', // Using GPT-4 for better function calling
+    console.log('🔧 Debug: Making OpenRouter request with function calling...');
+    const response = await openrouter.chat.completions.create({
+      model: import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-4-turbo', // Default to GPT-4 Turbo
       messages: messages,
       functions: romaFunctions as any,
-      function_call: 'auto', // Let AI decide when to call functions
+      function_call: 'auto',
       max_tokens: 500,
       temperature: 0.7,
     });
 
-    console.log('🔧 Debug: OpenAI response received:', response);
+    console.log('🔧 Debug: OpenRouter response received:', response);
     const choice = response.choices[0];
     const aiMessage = choice?.message;
 
@@ -111,7 +117,7 @@ ${nftContext}`
     if (aiMessage?.function_call) {
       console.log('🎯 Function call detected:', aiMessage.function_call);
       return {
-        content: '', // No text response when calling function
+        content: '',
         functionCall: {
           name: aiMessage.function_call.name,
           arguments: aiMessage.function_call.arguments
@@ -128,7 +134,7 @@ ${nftContext}`
     };
 
   } catch (error: any) {
-    console.error('❌ OpenAI Error Details:', {
+    console.error('❌ OpenRouter Error Details:', {
       message: error.message,
       status: error.status,
       code: error.code,
@@ -138,10 +144,10 @@ ${nftContext}`
 
     // More specific error messages
     if (error.status === 401) {
-      return { content: '🔑 Authentication failed. Please check your API key.' };
+      return { content: '🔑 Authentication failed. Please check your OpenRouter API key.' };
     }
     if (error.status === 429 || error.code === 'insufficient_quota') {
-      return { content: '💳 OpenAI API quota exceeded. Please check your billing plan at https://platform.openai.com/account/billing' };
+      return { content: '💳 OpenRouter API quota exceeded. Please check your credits at https://openrouter.ai/credits' };
     }
     if (error.status === 403) {
       return { content: '🚫 Access forbidden. Please check your API permissions.' };

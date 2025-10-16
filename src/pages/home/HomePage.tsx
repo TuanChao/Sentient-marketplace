@@ -1,10 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import HeroSection from '../../components/home/HeroSection';
+import CategorySection from '../../components/home/CategorySection';
+import ChainSelector from '../../components/home/ChainSelector';
+import FeaturedCollections from '../../components/home/FeaturedCollections';
+import StatsOverview from '../../components/home/StatsOverview';
 import NFTCard from '../../components/marketplace/NFTCard';
 import { type MarketplaceFilters as FiltersType } from '../../types/nft';
 import { mockNFTs } from '../../data/mock/mockNFTs';
-import './MarketplacePage-dark.css';
+import './HomePage.css';
 
-const MarketplacePage: React.FC = () => {
+const HomePage = () => {
   const [filters] = useState<FiltersType>({});
 
   const filteredNFTs = useMemo(() => {
@@ -72,36 +77,54 @@ const MarketplacePage: React.FC = () => {
   };
 
   return (
-    <div className="marketplace-page">
-      <div className="marketplace-content-full">
-        <div className="marketplace-header">
-          <h1>Discover NFTs</h1>
-          <p>Explore, collect, and sell extraordinary NFTs</p>
-          <div className="results-info">
-            <span>{filteredNFTs.length} items</span>
-          </div>
-        </div>
+    <div className="home-page">
+      {/* Category & Chain Navigation */}
+      <div className="top-navigation">
+        <CategorySection />
+        <ChainSelector />
+      </div>
 
-        <div className="nft-grid">
-          {filteredNFTs.map(nft => (
-            <NFTCard
-              key={nft.id}
-              nft={nft}
-              onLike={handleLike}
-              onBuy={handleBuy}
-            />
-          ))}
-        </div>
+      {/* Hero Section */}
+      <HeroSection />
 
-        {filteredNFTs.length === 0 && (
-          <div className="no-results">
-            <h3>No NFTs found</h3>
-            <p>Try adjusting your filters to see more results</p>
+      {/* Featured Collections */}
+      <FeaturedCollections />
+
+      {/* Stats Overview */}
+      <StatsOverview />
+
+      {/* NFT Marketplace Section */}
+      <div className="home-marketplace-section">
+        <div className="marketplace-content-full">
+          <div className="marketplace-header">
+            <h2>Explore NFTs</h2>
+            <p>Browse and discover extraordinary digital collectibles</p>
+            <div className="results-info">
+              <span>{filteredNFTs.length} items available</span>
+            </div>
           </div>
-        )}
+
+          <div className="nft-grid">
+            {filteredNFTs.map(nft => (
+              <NFTCard
+                key={nft.id}
+                nft={nft}
+                onLike={handleLike}
+                onBuy={handleBuy}
+              />
+            ))}
+          </div>
+
+          {filteredNFTs.length === 0 && (
+            <div className="no-results">
+              <h3>No NFTs found</h3>
+              <p>Try adjusting your filters to see more results</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default MarketplacePage;
+export default HomePage;

@@ -1,22 +1,18 @@
 /* Dark Theme Marketplace Page */
 .marketplace-page {
   width: 100%;
-  display: flex;
+  max-width: 100%;
   min-height: calc(100vh - 80px);
   background: var(--bg-primary);
-  gap: 32px;
   padding: 32px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-.marketplace-sidebar {
-  width: 300px;
-  flex-shrink: 0;
-}
-
-.marketplace-content {
-  flex: 1;
+.marketplace-content-full {
   width: 100%;
-  max-width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 /* Marketplace Header */

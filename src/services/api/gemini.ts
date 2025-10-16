@@ -1,17 +1,40 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getTopCollections, getTrendingCollections, getMarketSummary } from '../../utils/nftHelpers';
+import { romaFunctions } from '../ai/functionDefinitions';
 import { mockNFTs } from '../../data/mock/mockNFTs';
 
 // Gemini API - Free tier với 15 requests/minute
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
-export const sendMessageToGemini = async (message: string): Promise<string> => {
-  console.log('🔧 Debug: Starting Gemini request with:', message);
+export interface FunctionCall {
+  name: string;
+  arguments: string;
+}
+
+export interface AIResponse {
+  content: string;
+  functionCall?: FunctionCall;
+}
+
+// Convert ROMA functions to Gemini format
+const convertToGeminiFunctions = () => {
+  return romaFunctions.map(fn => ({
+    name: fn.name,
+    description: fn.description,
+    parameters: fn.parameters
+  }));
+};
+
+export const sendMessageWithFunctions = async (
+  message: string,
+  conversationHistory: any[] = []
+): Promise<AIResponse> => {
+  console.log('🔧 Debug: Starting Gemini sendMessageWithFunctions with:', message);
   console.log('🔧 Debug: Gemini API Key exists:', !!import.meta.env.VITE_GEMINI_API_KEY);
 
   try {
     if (!import.meta.env.VITE_GEMINI_API_KEY) {
-      return '🔑 Chưa cấu hình Gemini API key. Vui lòng thêm VITE_GEMINI_API_KEY vào file .env';
+      throw new Error('Gemini API key is not configured');
     }
 
     // Get current NFT market data for context
@@ -52,7 +75,41 @@ ${i + 1}. ${nft.name} (${nft.collection})
 - Avg Change: ${marketSummary.avgChange}%
 `;
 
-    const systemPrompt = `You are ROMA AI, the intelligent assistant of ROMA NFT Marketplace.
+    const systemInstruction = `You are ROMA, an advanced NFT & Web3 AI assistant with ACTION capabilities. You are an expert in NFTs, blockchain technology, cryptocurrency markets, and digital art.
+
+Core Capabilities:
+🎨 NFT discovery and analysis
+💎 Price predictions and market trends
+🔗 Blockchain explanations
+💰 Investment advice
+🚀 New collection launches
+📊 Portfolio analysis
+
+IMPORTANT: You can perform ACTIONS for users by calling functions:
+- Search NFTs by collection, price, rarity
+- Analyze collections in detail
+- Add NFTs to cart or favorites
+- Get market statistics
+- Create price alerts
+- Navigate to different pages
+
+When a user asks you to DO something (search, find, show, add, analyze, etc.), you MUST call the appropriate function instead of just describing it.
+
+Examples:
+❌ "I can help you search for NFTs under 5 ETH"
+✅ Call searchNFTs function with maxPrice: 5
+
+❌ "You can find Azuki NFTs in the marketplace"
+✅ Call searchNFTs function with collection: "Azuki"
+
+❌ "I'll analyze Bored Ape Yacht Club for you"
+✅ Call analyzeCollection function with collectionName: "Bored Ape Yacht Club"
+
+Always be proactive and take action when users request something!
+
+${nftContext}
+
+About ROMA AI, the intelligent assistant of ROMA NFT Marketplace.
 
 🌟 ABOUT ROMA MARKETPLACE:
 ROMA is a modern NFT marketplace platform with comprehensive features:
@@ -98,19 +155,48 @@ ${nftContext}
 
 Please respond based on ROMA Marketplace information and the NFT data above!`;
 
-    const fullPrompt = `${systemPrompt}\n\n❓ User Question: ${message}`;
+    console.log('🔧 Debug: Making Gemini request with function calling...');
 
-    console.log('🔧 Debug: Making Gemini request...');
+    // Use Gemini 2.0 Flash Experimental with function calling
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: systemInstruction,
+      tools: [{
+        functionDeclarations: convertToGeminiFunctions()
+      }]
+    });
 
-    // Use the available model
-    const model = genAI.getGenerativeModel({ model: "models/gemini-pro" });
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const text = response.text();
+    const chat = model.startChat({
+      history: conversationHistory,
+    });
 
-    console.log('🔧 Debug: Gemini response received:', text);
+    const result = await chat.sendMessage(message);
+    const response = result.response;
 
-    return text || 'Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.';
+    console.log('🔧 Debug: Gemini response received:', response);
+
+    // Check if Gemini wants to call a function
+    const functionCalls = response.functionCalls();
+
+    if (functionCalls && functionCalls.length > 0) {
+      const functionCall = functionCalls[0];
+      console.log('🎯 Function call detected:', functionCall);
+      return {
+        content: '',
+        functionCall: {
+          name: functionCall.name,
+          arguments: JSON.stringify(functionCall.args)
+        }
+      };
+    }
+
+    // Regular text response
+    const content = response.text();
+    console.log('🔧 Debug: Extracted content:', content);
+
+    return {
+      content: content || 'Sorry, I could not process your request.'
+    };
 
   } catch (error: any) {
     console.error('❌ Gemini Error Details:', {
@@ -120,20 +206,32 @@ Please respond based on ROMA Marketplace information and the NFT data above!`;
       fullError: error
     });
 
-    // Handle specific Gemini errors
-    if (error.message?.includes('API_KEY_INVALID')) {
-      return '🔑 API key không hợp lệ. Vui lòng kiểm tra Gemini API key.';
+    // More specific error messages
+    if (error.message?.includes('API key') || error.message?.includes('API_KEY_INVALID')) {
+      return { content: '🔑 Authentication failed. Please check your Gemini API key.' };
     }
-    if (error.message?.includes('QUOTA_EXCEEDED')) {
-      return '📊 Đã vượt quá quota API. Vui lòng đợi một chút rồi thử lại.';
+    if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('QUOTA_EXCEEDED')) {
+      return { content: '💳 Gemini API quota exceeded. Free tier: 15 requests/minute. Please try again in a minute.' };
     }
     if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
-      return '⏰ Quá nhiều requests. Vui lòng đợi 1 phút rồi thử lại.';
+      return { content: '⏰ Too many requests. Please wait 1 minute and try again.' };
     }
-    if (error.message?.includes('not found') || error.message?.includes('404')) {
-      return '🔧 Model không tồn tại. Đang thử model khác... Refresh trang và thử lại.';
+    if (error.status === 403) {
+      return { content: '🚫 Access forbidden. Please check your API permissions.' };
     }
 
-    return `❌ Lỗi: ${error.message || 'Không thể kết nối với AI'}`;
+    return { content: `Error: ${error.message || 'Failed to get response from AI'}` };
   }
+};
+
+// Legacy function for backward compatibility
+export const sendMessage = async (message: string): Promise<string> => {
+  const response = await sendMessageWithFunctions(message);
+  return response.content;
+};
+
+// Keep old function for backward compatibility
+export const sendMessageToGemini = async (message: string): Promise<string> => {
+  const response = await sendMessageWithFunctions(message);
+  return response.content;
 };

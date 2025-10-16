@@ -1,0 +1,133 @@
+.home-page {
+  min-height: 100vh;
+  background: #0d111c;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Top Navigation */
+.top-navigation {
+  position: sticky;
+  
+  z-index: 90;
+  background: #0d111c;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 1024px) {
+  .top-navigation {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+  }
+}
+
+/* Marketplace Section on Homepage */
+.home-marketplace-section {
+  padding: 80px 40px;
+  background: linear-gradient(180deg, #0d111c 0%, #1a1f35 100%);
+}
+
+.marketplace-content-full {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.marketplace-header {
+  margin-bottom: 40px;
+}
+
+.marketplace-header h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 12px 0;
+}
+
+.marketplace-header p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 20px 0;
+}
+
+.results-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(30, 35, 54, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: inline-flex;
+}
+
+.results-info span {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* NFT Grid */
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 80px 20px;
+  color: white;
+}
+
+.no-results h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.no-results p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .marketplace-container {
+    flex-direction: column;
+  }
+
+  .marketplace-sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-marketplace-section {
+    padding: 60px 20px;
+  }
+
+  .marketplace-container {
+    gap: 24px;
+  }
+
+  .marketplace-header h2 {
+    font-size: 28px;
+  }
+
+  .nft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}

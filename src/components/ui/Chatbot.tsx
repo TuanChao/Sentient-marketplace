@@ -7,14 +7,20 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
 import type { Message } from '../../types/chat';
-import { sendMessageToHuggingFace } from '../../services/api/huggingface';
+// Switch between different AI providers
+// import { sendMessageWithFunctions } from '../../services/api/openai';
+// import { sendMessageWithFunctions } from '../../services/api/openrouter';
+// import { sendMessageWithFunctions } from '../../services/api/deepseek';
+import { sendMessageWithFunctions } from '../../services/api/gemini';
+import { executeFunctionCall } from '../../services/ai/functionHandlers';
+import { useNavigate } from 'react-router-dom';
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: '👋 **Welcome to ROMA NFT Marketplace!**\n\nI\'m ROMA AI, your intelligent NFT assistant. I can help you with:\n\n🎨 **Explore Features** - Browse marketplace, collections, stats, create, profile\n💎 **NFT Analysis** - Compare 15+ premium collections\n📊 **Investment Advice** - Get personalized recommendations for your budget\n🔐 **Guidance** - Wallet connection, minting, signature verification\n\n**Try asking:**\n• "Show me marketplace features"\n• "Analyze Azuki collection"\n• "How do I create an NFT?"\n• "What should I buy with 3 ETH?"\n\nAsk me anything! 🚀',
+      content: '👋 **Welcome to ROMA NFT Marketplace!**\n\nI\'m ROMA AI, your intelligent NFT assistant with **ACTION CAPABILITIES**! I can:\n\n🎨 **Search & Filter NFTs** - "Show me Azuki NFTs under 10 ETH"\n💎 **Analyze Collections** - "Analyze Bored Ape Yacht Club"\n🛒 **Manage Cart & Favorites** - "Add this to my cart"\n📊 **Market Intelligence** - "Show market stats"\n🔔 **Price Alerts** - "Alert me when BAYC drops below 15 ETH"\n💰 **Investment Advice** - "What should I buy with 5 ETH?"\n🔗 **Navigate** - "Take me to marketplace"\n\n**Try these commands:**\n• "Search for rare Azuki NFTs"\n• "Analyze CryptoPunks"\n• "Show me market statistics"\n• "What\'s the best investment for 10 ETH?"\n\nI don\'t just talk - I take action! 🚀',
       role: 'assistant',
       timestamp: new Date()
     }
@@ -22,6 +28,7 @@ const Chatbot: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,40 +52,78 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('🤖 Chatbot: Calling sendMessageToHuggingFace...');
+      console.log('🤖 Chatbot: Calling Gemini with function calling...');
 
-      // Simulate thinking time (1-2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-      const response = await sendMessageToHuggingFace(content);
+      // Call Gemini with function calling capability
+      const response = await sendMessageWithFunctions(content);
       console.log('🤖 Chatbot: Received response:', response);
 
-      // Create placeholder message for streaming effect
-      const botMessageId = (Date.now() + 1).toString();
-      const botMessage: Message = {
-        id: botMessageId,
-        content: '', // Start empty
-        role: 'assistant',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMessage]);
-      setIsLoading(false);
+      // Check if AI wants to call a function
+      if (response.functionCall) {
+        console.log('🎯 Function call detected:', response.functionCall);
 
-      // Streaming text effect - type character by character
-      const words = response.split(' ');
-      let currentText = '';
+        // Execute the function
+        const functionResult = executeFunctionCall(
+          response.functionCall.name,
+          response.functionCall.arguments
+        );
 
-      for (let i = 0; i < words.length; i++) {
-        currentText += (i > 0 ? ' ' : '') + words[i];
+        console.log('✅ Function result:', functionResult);
 
-        setMessages(prev => prev.map(msg =>
-          msg.id === botMessageId
-            ? { ...msg, content: currentText }
-            : msg
-        ));
+        // Handle navigation actions
+        if (functionResult.action) {
+          if (functionResult.action.type === 'NAVIGATE') {
+            setTimeout(() => {
+              navigate(`/${functionResult.action.payload.page}`);
+            }, 1500);
+          } else if (functionResult.action.type === 'NAVIGATE_WITH_FILTERS') {
+            setTimeout(() => {
+              navigate(`/${functionResult.action.payload.page}`, {
+                state: { filters: functionResult.action.payload.filters }
+              });
+            }, 1500);
+          }
+        }
 
-        // Random delay between words (20-80ms)
-        await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 60));
+        // Show function result to user
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: functionResult.message,
+          role: 'assistant',
+          timestamp: new Date(),
+          functionCall: response.functionCall,
+          functionResult: functionResult
+        };
+
+        setMessages(prev => [...prev, botMessage]);
+        setIsLoading(false);
+      } else {
+        // Regular text response - add streaming effect
+        const botMessageId = (Date.now() + 1).toString();
+        const botMessage: Message = {
+          id: botMessageId,
+          content: '',
+          role: 'assistant',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsLoading(false);
+
+        // Streaming text effect
+        const words = response.content.split(' ');
+        let currentText = '';
+
+        for (let i = 0; i < words.length; i++) {
+          currentText += (i > 0 ? ' ' : '') + words[i];
+
+          setMessages(prev => prev.map(msg =>
+            msg.id === botMessageId
+              ? { ...msg, content: currentText }
+              : msg
+          ));
+
+          await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 60));
+        }
       }
 
     } catch (error) {
@@ -133,7 +178,7 @@ const Chatbot: React.FC = () => {
           <div className="chat-header">
             <div className="header-content">
               <SentientLogo size={22} className="header-logo" color="#ff69b4" />
-              <span>ROMA • NFT Assistant (HF AI)</span>
+              <span>ROMA • AI Agent (Gemini)</span>
             </div>
             <div className="header-actions">
               <button
